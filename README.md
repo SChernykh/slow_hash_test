@@ -3,4 +3,5 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/16625/badge.svg"/>
 </a>
+
 Tests Cryptonight variants with various GCC sanitizers - undefined behavior, address and pointer sanitizer.
