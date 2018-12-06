@@ -13,7 +13,8 @@ extern "C"
 
 enum
 {
-	NUM_VARIANTS = 3,
+	NUM_VARIANTS = 4,
+	V4_TEST_BLOCK_HEIGHT = 1806260, // April 4, 2019 - totally random guess, but we need some number for testing.
 };
 
 int main(int argc, char** argv)
@@ -44,10 +45,14 @@ int main(int argc, char** argv)
 			std::cout << input << std::endl;
 		}
 
+		const int variant[4] = { 0, 1, 2, 4 };
 		for (int i = 0; i < NUM_VARIANTS; ++i)
 		{
 			char hash[32];
-			cn_slow_hash(input.c_str(), input.length(), hash, i, 0);
+			cn_slow_hash(input.c_str(), input.length(), hash, variant[i], 0, V4_TEST_BLOCK_HEIGHT);
+
+			std::string output;
+			std::getline(f, output);
 
 			if (generate_hashes)
 			{
@@ -59,8 +64,6 @@ int main(int argc, char** argv)
 			}
 			else
 			{
-				std::string output;
-				std::getline(f, output);
 				if (output.length() != HASH_SIZE * 2)
 				{
 					std::cerr << "Invalid test file" << std::endl;
@@ -76,7 +79,7 @@ int main(int argc, char** argv)
 				if (memcmp(hash, reference_hash, HASH_SIZE) != 0)
 				{
 					all_passed = false;
-					std::cerr << "Hash test failed for string \"" << input << "\", variant " << i << std::endl;
+					std::cerr << "Hash test failed for string \"" << input << "\", variant " << variant[i] << std::endl;
 					std::cerr << "Reference hash:  " << output << std::endl;
 					std::cerr << "Calculated hash: ";
 					for (int j = 0; j < HASH_SIZE; ++j)
