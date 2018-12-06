@@ -230,14 +230,14 @@ extern void aesb_pseudo_round(const uint8_t *in, uint8_t *out, const uint8_t *ex
     code_size = v4_random_math_init(code, height); \
   } while (0)
 
-#define VARIANT4_RANDOM_MATH(a, b, r) \
+#define VARIANT4_RANDOM_MATH(a, b, r, _b, _b1) \
   do if (variant >= 4) \
   { \
-    b[0] ^= (r[0] + r[1]) | ((uint64_t)(r[2] + r[3]) << 32); \
-    r[4] = a[0]; \
-    r[5] = a[1]; \
-    r[6] = *(uint32_t*)(&_b); \
-    r[7] = *(uint32_t*)(&_b1); \
+    U64(b)[0] ^= (r[0] + r[1]) | ((uint64_t)(r[2] + r[3]) << 32); \
+    r[4] = ((uint32_t*)(a))[0]; \
+    r[5] = ((uint32_t*)(a))[2]; \
+    r[6] = ((uint32_t*)(_b))[0]; \
+    r[7] = ((uint32_t*)(_b1))[0]; \
     v4_random_math(code, code_size, r); \
   } while (0)
 
@@ -325,7 +325,7 @@ extern void aesb_pseudo_round(const uint8_t *in, uint8_t *out, const uint8_t *ex
   p = U64(&hp_state[j]); \
   b[0] = p[0]; b[1] = p[1]; \
   VARIANT2_INTEGER_MATH_SSE2(b, c); \
-  VARIANT4_RANDOM_MATH(a, b, r); \
+  VARIANT4_RANDOM_MATH(a, b, r, &_b, &_b1); \
   __mul(); \
   VARIANT2_2(); \
   VARIANT2_SHUFFLE_ADD_SSE2(hp_state, j); \
@@ -930,7 +930,7 @@ union cn_slow_hash_state
   p = U64(&hp_state[j]); \
   b[0] = p[0]; b[1] = p[1]; \
   VARIANT2_PORTABLE_INTEGER_MATH(b, c); \
-  VARIANT4_RANDOM_MATH(a, b, r); \
+  VARIANT4_RANDOM_MATH(a, b, r, &_b, &_b1); \
   __mul(); \
   VARIANT2_2(); \
   VARIANT2_SHUFFLE_ADD_NEON(hp_state, j); \
@@ -1385,7 +1385,7 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
       copy_block(c, p);
 
       VARIANT2_PORTABLE_INTEGER_MATH(c, c1);
-      VARIANT4_RANDOM_MATH(a, b, r);
+      VARIANT4_RANDOM_MATH(a, c, r, b, b + AES_BLOCK_SIZE);
       mul(c1, c, d);
       VARIANT2_2_PORTABLE();
       VARIANT2_PORTABLE_SHUFFLE_ADD(long_state, j);
@@ -1571,7 +1571,7 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
     j = e2i(c1, MEMORY / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
     copy_block(c2, &long_state[j]);
     VARIANT2_PORTABLE_INTEGER_MATH(c2, c1);
-    VARIANT4_RANDOM_MATH(a, b, r);
+	VARIANT4_RANDOM_MATH(a, c2, r, b, b + AES_BLOCK_SIZE);
     mul(c1, c2, d);
     VARIANT2_2_PORTABLE();
     VARIANT2_PORTABLE_SHUFFLE_ADD(long_state, j);
