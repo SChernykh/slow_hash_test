@@ -31,6 +31,7 @@ int main(int argc, char** argv)
 	std::ifstream f(argv[1]);
 
 	auto t1 = std::chrono::high_resolution_clock::now();
+	uint64_t height = V4_TEST_BLOCK_HEIGHT;
 	while (!f.eof())
 	{
 		std::string input;
@@ -49,7 +50,7 @@ int main(int argc, char** argv)
 		for (int i = 0; i < NUM_VARIANTS; ++i)
 		{
 			char hash[32];
-			cn_slow_hash(input.c_str(), input.length(), hash, variant[i], 0, V4_TEST_BLOCK_HEIGHT);
+			cn_slow_hash(input.c_str(), input.length(), hash, variant[i], 0, height);
 
 			std::string output;
 			std::getline(f, output);
@@ -90,6 +91,7 @@ int main(int argc, char** argv)
 				}
 			}
 		}
+		++height;
 	}
 	auto t2 = std::chrono::high_resolution_clock::now();
 
