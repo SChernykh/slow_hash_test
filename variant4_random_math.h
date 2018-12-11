@@ -2,7 +2,11 @@
 #define VARIANT4_RANDOM_MATH_H
 
 // Register size can be configured to either 32 or 64 bit
+#ifdef RANDOM_MATH_64_BIT
+typedef uint64_t v4_reg;
+#else
 typedef uint32_t v4_reg;
+#endif
 
 enum V4_Settings
 {
