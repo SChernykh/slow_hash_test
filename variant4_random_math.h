@@ -2,7 +2,7 @@
 #define VARIANT4_RANDOM_MATH_H
 
 // Register size can be configured to either 32 or 64 bit
-#ifdef RANDOM_MATH_64_BIT
+#if RANDOM_MATH_64_BIT == 1
 typedef uint64_t v4_reg;
 #else
 typedef uint32_t v4_reg;

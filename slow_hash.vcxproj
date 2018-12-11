@@ -48,7 +48,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RANDOM_MATH_64_BIT=0;WIN32;_DEBUG</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <StackReserveSize>4194304</StackReserveSize>
@@ -56,7 +56,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RANDOM_MATH_64_BIT=0;WIN32;NDEBUG</PreprocessorDefinitions>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
