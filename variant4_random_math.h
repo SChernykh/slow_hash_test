@@ -45,6 +45,11 @@ struct V4_Instruction
 
 static inline void v4_random_math(const struct V4_Instruction* code, int code_size, v4_reg* r)
 {
+	enum
+	{
+		REG_BITS = sizeof(v4_reg) * 8,
+	};
+
 	for (int i = 0; i < code_size; ++i)
 	{
 		struct V4_Instruction op = code[i];
@@ -70,13 +75,13 @@ static inline void v4_random_math(const struct V4_Instruction* code, int code_si
 			break;
 
 		case ROR:
-			shift = src & 31;
-			r[op.dst_index] = (dst >> shift) | (dst << (32 - shift));
+			shift = src % REG_BITS;
+			r[op.dst_index] = (dst >> shift) | (dst << (REG_BITS - shift));
 			break;
 
 		case ROL:
-			shift = src & 31;
-			r[op.dst_index] = (dst << shift) | (dst >> (32 - shift));
+			shift = src % REG_BITS;
+			r[op.dst_index] = (dst << shift) | (dst >> (REG_BITS - shift));
 			break;
 
 		case XOR:
