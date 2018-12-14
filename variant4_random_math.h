@@ -168,7 +168,7 @@ static inline void v4_random_math_init(struct V4_Instruction* code, const uint64
 	memset(data, 0, sizeof(data));
 	*((uint64_t*)data) = height;
 
-	int data_index = sizeof(data);
+	size_t data_index = sizeof(data);
 
 	int latency[8];
 	bool alu_busy[TOTAL_LATENCY][ALU_COUNT];
@@ -253,7 +253,6 @@ static inline void v4_random_math_init(struct V4_Instruction* code, const uint64
 	code[code_size].dst_index = 0;
 	code[code_size].src_index = 0;
 	code[code_size].C = 0;
-	++code_size;
 }
 
 #endif
