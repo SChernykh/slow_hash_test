@@ -145,8 +145,8 @@ extern void aesb_pseudo_round(const uint8_t *in, uint8_t *out, const uint8_t *ex
     if (variant >= 4) \
     { \
       chunk1 = veorq_u64(chunk1, chunk2); \
-      _c = veorq_u64(_c, chunk3); \
-      _c = veorq_u64(_c, chunk1); \
+      _c = vreinterpretq_u8_u64(veorq_u64(vreinterpretq_u64_u8(_c), chunk3)); \
+      _c = vreinterpretq_u8_u64(veorq_u64(vreinterpretq_u64_u8(_c), chunk1)); \
     } \
   } while (0)
 
