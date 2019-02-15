@@ -281,7 +281,7 @@ extern void aesb_pseudo_round(const uint8_t *in, uint8_t *out, const uint8_t *ex
     V4_REG_LOAD(r + 7, _b1); \
     V4_REG_LOAD(r + 8, (uint64_t*)(_b1) + 1); \
     \
-    v4_random_math(code, r); \
+    V4_RANDOM_MATH(code, r); \
     \
     memcpy(t, a, sizeof(uint64_t) * 2); \
     \
@@ -356,6 +356,12 @@ extern void aesb_pseudo_round(const uint8_t *in, uint8_t *out, const uint8_t *ex
 #endif
 #endif
 
+#define V4_RANDOM_MATH(code, r) \
+    if (hp_v4_JIT_code) \
+        hp_v4_JIT_code(r); \
+    else \
+        v4_random_math(code, r);
+
 #define pre_aes() \
   j = state_index(a); \
   _c = _mm_load_si128(R128(&hp_state[j])); \
@@ -411,6 +417,10 @@ union cn_slow_hash_state
 
 THREADV uint8_t *hp_state = NULL;
 THREADV int hp_allocated = 0;
+
+#include "CryptonightR_JIT.h"
+
+THREADV v4_random_math_JIT_func hp_v4_JIT_code = NULL;
 
 #if defined(_MSC_VER)
 #define cpuid(info,x)    __cpuidex(info,x,0)
@@ -722,6 +732,24 @@ void slow_hash_allocate_state(void)
     }
 }
 
+void slow_hash_allocate_JIT_memory(void)
+{
+    if(hp_v4_JIT_code != NULL)
+        return;
+
+#if defined(_MSC_VER) || defined(__MINGW32__)
+    hp_v4_JIT_code = (uint8_t *) VirtualAlloc(hp_state, 65536, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+#else
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__NetBSD__)
+    hp_v4_JIT_code = mmap(0, 65536, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANON, 0, 0);
+#else
+    hp_v4_JIT_code = mmap(0, 65536, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+#endif
+    if(hp_v4_JIT_code == MAP_FAILED)
+        hp_v4_JIT_code = NULL;
+#endif
+}
+
 /**
  *@brief frees the state allocated by slow_hash_allocate_state
  */
@@ -813,6 +841,16 @@ void cn_slow_hash(const void *data, size_t length, char *hash, int variant, int 
     VARIANT1_INIT64();
     VARIANT2_INIT64();
     VARIANT4_RANDOM_MATH_INIT();
+
+    if (!hp_v4_JIT_code)
+    {
+        slow_hash_allocate_JIT_memory();
+    }
+
+    if (hp_v4_JIT_code)
+    {
+        v4_generate_JIT_code(code, hp_v4_JIT_code, 65536);
+    }
 
     /* CryptoNight Step 2:  Iteratively encrypt the results from Keccak to fill
      * the 2MB large random access buffer.
